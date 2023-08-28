@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.function.Consumer;
 import org.apache.commons.io.output.NullOutputStream;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -104,14 +105,20 @@ public class GeometryGenerator {
     Pipe.pipe(phase1(csvInputStream), phase2(geoJsonOutputStream, wktOutputStream));
   }
 
+  private static Optional<Path> getParent(Path path) {
+    return Optional.ofNullable(path.getParent());
+  }
+
   public void generateGeometryFile(Path inputFile, Path outputFile, OutputType outputType) {
-    if (outputFile.getParent() != null && !Files.exists(outputFile.getParent())) {
-      try {
-        Files.createDirectories(outputFile.getParent());
-      } catch (IOException e) {
-        throw new RuntimeException("Unable to create directory " + outputFile.getParent(), e);
+    getParent(outputFile).ifPresent(parent -> {
+      if (!Files.exists(parent)) {
+        try {
+          Files.createDirectories(parent);
+        } catch (IOException e) {
+          throw new RuntimeException("Unable to create directory " + outputFile.getParent(), e);
+        }
       }
-    }
+    });
     try (InputStream inputStream = new BufferedInputStream(Files.newInputStream(inputFile));
         OutputStream outputStream = new BufferedOutputStream(Files.newOutputStream(outputFile))
     ) {
