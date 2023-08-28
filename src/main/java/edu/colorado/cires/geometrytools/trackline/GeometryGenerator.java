@@ -105,7 +105,7 @@ public class GeometryGenerator {
   }
 
   public void generateGeometryFile(Path inputFile, Path outputFile, OutputType outputType) {
-    if (!Files.exists(outputFile.getParent())) {
+    if (outputFile.getParent() != null && !Files.exists(outputFile.getParent())) {
       try {
         Files.createDirectories(outputFile.getParent());
       } catch (IOException e) {
